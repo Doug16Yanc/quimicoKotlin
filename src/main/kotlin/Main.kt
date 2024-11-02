@@ -1,52 +1,55 @@
-open class Elemento(val nome : String)
-{
-    open fun Particula.reage(nome : String) : Unit
-    {
-        println("$nome reage com uma partícula.")
-    }
-    open fun Eletron.reage(nome : String) : Unit
-    {
-        println("$nome é elemento reativo, portanto, doa ou recebe elétrons.")
-    }
-    fun reage(particula: Particula) : Unit
-    {
-        particula.reage(nome)
-    }
-    open fun reage(eletron: Eletron)
-    {
-        eletron.reage(nome)
-    }
-    class GasNobre(nome : String) : Elemento(nome)
-    {
-        override fun Particula.reage(nome : String) : Unit
-        {
-            println("$nome é um gás nobre, não reage com demais elementos.")
-        }
-        override fun Eletron.reage(nome : String) : Unit
-        {
-            println("$nome é umg gás nobre, portanto, nem recebe nem doa elétrons.")
-        }
-        override fun reage(particula : Eletron) : Unit {
-            particula.reage(nome)
-        }
-    }
+import java.util.Objects
+
+fun interface isSubstance {
+    fun defineSubstance(ph : Double, formula : String, solubility : Boolean) : String
 }
 
-class Eletron {
-
+val acido = isSubstance { ph, formula, solubility ->
+    (if (ph < 6.9 && formula.contains("H") && solubility) {
+        "$formula é um ácido."
+    }
+    else "$formula não é um ácido.")
 }
 
-class Particula {
-
+val base = isSubstance {ph, formula, solubility ->
+    (if (ph > 7.1 && formula.contains("OH") && solubility) {
+        "$formula é uma base."
+    } else "$formula não é uma base")
 }
 
-fun main()
-{
-    val calcio = Elemento("Cálcio")
-    calcio.reage(Particula())
-    calcio.reage(Eletron())
-
-    val argonio = Elemento.GasNobre("Argonio")
-    argonio.reage(Particula())
-    argonio.reage(Eletron())
+val sal = isSubstance { ph, formula, solubility ->
+    (if (ph == 7.0 && formula.isNotEmpty() && solubility) {
+        "$formula é um sal."
+    }else "$formula não é um sal.")
 }
+
+val oxido = isSubstance { ph, formula, solubility ->
+    (if ((ph != 0.0) && formula.contains("O") && !solubility) {
+        "$formula é um óxido."
+    } else "$formula não é um óxido.")
+}
+
+fun retornaSubstancia(substance: isSubstance, ph : Double, formula : String, solubility: Boolean) : String {
+    return substance.defineSubstance(ph, formula, solubility)
+}
+enum class State {
+    SOLIDO,
+    LIQUIDO,
+    GASOSO
+}
+
+data class Substance(
+    val name : String = "",
+    val formula : String = "",
+    val ph : Double = 0.0,
+    val state : State = State.SOLIDO,
+    val solubility : Boolean = true)
+
+fun main() {
+    var substance = Substance("Cloreto de potássio", "KCl", 7.0, State.SOLIDO, true)
+
+    println(retornaSubstancia(sal, substance.ph, substance.formula, substance.solubility))
+}
+
+
+
